@@ -1,7 +1,7 @@
 'use client'
 
-import FormButton from '@/components/form-btn'
-import FormInput from '@/components/form-input'
+import Button from '@/components/button'
+import Input from '@/components/input'
 import { ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import { useFormState } from 'react-dom'
@@ -16,35 +16,39 @@ export default function CreateAccount() {
 				<h2 className='text-xl'>Fill in the form below to join!</h2>
 			</div>
 			<form action={action} className='flex flex-col gap-3'>
-				<FormInput
+				<Input
 					name='username'
 					required
 					type='text'
 					placeholder='Username'
 					errors={state?.fieldErrors.username}
+					minLength={3}
+					maxLength={10}
 				/>
-				<FormInput
+				<Input
 					name='email'
 					required
 					type='email'
 					placeholder='Email'
 					errors={state?.fieldErrors.email}
 				/>
-				<FormInput
+				<Input
 					name='password'
 					required
 					type='password'
 					placeholder='Password'
 					errors={state?.fieldErrors.password}
+					minLength={4}
 				/>
-				<FormInput
+				<Input
 					name='confirm_password'
 					required
 					type='password'
 					placeholder='Confirm Password'
 					errors={state?.fieldErrors.confirm_password}
+					minLength={4}
 				/>
-				<FormButton text='Create Account' />
+				<Button text='Create Account' />
 			</form>
 			<div className='w-full h-px bg-neutral-500' />
 			<div>
