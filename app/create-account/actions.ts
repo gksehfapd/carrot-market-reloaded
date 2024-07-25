@@ -1,7 +1,6 @@
 'use server'
 import { z } from 'zod'
-
-const passwordRegex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*?[#?!@$%^&*-]).+$/)
+import { PASSWORD_MIN_LENGTH, PASSWORD_REGEX, PASSWORD_REGEX_ERROR } from '@/lib/constasts'
 
 const formSchema = z
 	.object({
@@ -18,12 +17,9 @@ const formSchema = z
 			.refine((username) => !username.includes('potato'), 'No potatoes allowed!'),
 		email: z.string().email().toLowerCase(),
 		password: z
-			.string()
-			.min(4)
-			.regex(
-				passwordRegex,
-				'Passwords must contain at least one UPPERCASE, lowercase, number and special characters #?!@$%^&*-'
-			),
+			.string({ required_error: 'Password is required' })
+			.min(PASSWORD_MIN_LENGTH)
+			.regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
 		confirm_password: z.string().min(4)
 	})
 	.superRefine(({ password, confirm_password }, ctx) => {
@@ -44,6 +40,7 @@ export async function createAccount(prevState: any, formData: FormData) {
 	}
 	const result = formSchema.safeParse(data)
 	if (!result.success) {
+		console.log(result.error)
 		return result.error.flatten()
 	} else {
 		console.log(result.data)

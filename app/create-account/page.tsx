@@ -5,17 +5,18 @@ import Input from '@/components/input'
 import { ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import { useFormState } from 'react-dom'
-import { createAccount } from './actions'
+import { createAccount } from '@/app/create-account/actions'
+import { PASSWORD_MIN_LENGTH } from '@/lib/constasts'
 
 export default function CreateAccount() {
-	const [state, action] = useFormState(createAccount, null)
+	const [state, dispatch] = useFormState(createAccount, null)
 	return (
 		<div className='flex flex-col gap-10 py-8 px-6'>
 			<div className='flex flex-col gap-2 *:font-medium'>
 				<h1 className='text-2xl'>안녕하세요!</h1>
 				<h2 className='text-xl'>Fill in the form below to join!</h2>
 			</div>
-			<form action={action} className='flex flex-col gap-3'>
+			<form action={dispatch} className='flex flex-col gap-3'>
 				<Input
 					name='username'
 					required
@@ -38,7 +39,7 @@ export default function CreateAccount() {
 					type='password'
 					placeholder='Password'
 					errors={state?.fieldErrors.password}
-					minLength={4}
+					minLength={PASSWORD_MIN_LENGTH}
 				/>
 				<Input
 					name='confirm_password'
@@ -46,7 +47,7 @@ export default function CreateAccount() {
 					type='password'
 					placeholder='Confirm Password'
 					errors={state?.fieldErrors.confirm_password}
-					minLength={4}
+					minLength={PASSWORD_MIN_LENGTH}
 				/>
 				<Button text='Create Account' />
 			</form>
