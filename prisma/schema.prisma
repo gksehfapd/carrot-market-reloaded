@@ -9,6 +9,12 @@ datasource db {
 
 // 모델 추가 시 npx prisma migrate dev 명령어 실행
 // prisma에 저장될 커밋 이름 지정 후 엔터
+// 실행 시 아래 목록 등 실행됨
+// 1. 데이터베이스 변경 사항을 확인하고, 수정되었거나 삭제된 부분을 찾습니다.
+// 2. 새로운 변경 사항이 있다면, 그것을 시험해 볼 수 있는 별도의 데이터베이스에 먼저 적용합니다. (테스트 목적)
+// 3. 데이터 모델에 변화가 있으면, 그에 맞는 새로운 마이그레이션을 만듭니다.
+// 4. 모든 새로운 마이그레이션을 실제 데이터베이스에 적용하고, 이를 기록합니다.
+// 5. 필요한 코드를 자동으로 생성합니다. (Prisma Client 등..)
 
 model User {
   id			Int			@id @default(autoincrement()) //autoincrement : 유저가 계정을 생성할 때 첫번째 사용자의 id는 자동으로 1이 됨
@@ -20,4 +26,15 @@ model User {
   avatar		String?
   created_at	DateTime 	@default(now())
   updated_at	DateTime 	@updatedAt
+
+  SMSToken SMSToken[]
+}
+
+model SMSToken{
+	id			Int			@id @default(autoincrement())
+	token 		String		@unique
+	created_at	DateTime 	@default(now())
+  	updated_at	DateTime 	@updatedAt
+	user 		User		@relation(fields: [userId], references: [id])
+	userId		Int
 }
