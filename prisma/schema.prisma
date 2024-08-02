@@ -6,3 +6,18 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+// 모델 추가 시 npx prisma migrate dev 명령어 실행
+// prisma에 저장될 커밋 이름 지정 후 엔터
+
+model User {
+  id			Int			@id @default(autoincrement()) //autoincrement : 유저가 계정을 생성할 때 첫번째 사용자의 id는 자동으로 1이 됨
+  username		String		@unique
+  email			String?		@unique
+  password		String?
+  phone			String? 	@unique
+  github_id		String?
+  avatar		String?
+  created_at	DateTime 	@default(now())
+  updated_at	DateTime 	@updatedAt
+}
