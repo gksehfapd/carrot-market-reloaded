@@ -1,6 +1,30 @@
 'use server'
+import bcrypt from 'bcrypt'
 import { z } from 'zod'
 import { PASSWORD_MIN_LENGTH, PASSWORD_REGEX, PASSWORD_REGEX_ERROR } from '@/lib/constasts'
+import db from '@/lib/db'
+
+const checkUniqueUsername = async (username: string) => {
+	const user = await db.user.findUnique({
+		where: {
+			username
+		},
+		select: {
+			id: true
+		}
+	})
+	return !Boolean(user)
+}
+
+const checkUniqueEmail = async (email: string) => {
+	const user = await db.user.findUnique({
+		where: { email },
+		select: {
+			id: true
+		}
+	})
+	return !Boolean(user)
+}
 
 const formSchema = z
 	.object({
@@ -13,13 +37,17 @@ const formSchema = z
 			//.max(10, "That is too looooong!")
 			.trim()
 			.toLowerCase()
-			.transform((username) => `🔥 ${username}`)
-			.refine((username) => !username.includes('potato'), 'No potatoes allowed!'),
-		email: z.string().email().toLowerCase(),
-		password: z
-			.string({ required_error: 'Password is required' })
-			.min(PASSWORD_MIN_LENGTH)
-			.regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
+			//.transform((username) => `🔥 ${username}`)
+			// // refine : 특정 조건에 따라 데이터를 검증하기 위해 사용
+			.refine((username) => !username.includes('potato'), 'No potatoes allowed!')
+			.refine(checkUniqueUsername, 'This username is already taken'),
+		email: z
+			.string()
+			.email()
+			.toLowerCase()
+			.refine(checkUniqueEmail, 'There is an account already registered with that email'),
+		password: z.string({ required_error: 'Password is required' }).min(PASSWORD_MIN_LENGTH),
+		//.regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR)
 		confirm_password: z.string().min(4)
 	})
 	.superRefine(({ password, confirm_password }, ctx) => {
@@ -38,11 +66,29 @@ export async function createAccount(prevState: any, formData: FormData) {
 		password: formData.get('password'),
 		confirm_password: formData.get('confirm_password')
 	}
-	const result = formSchema.safeParse(data)
+
+	const result = await formSchema.safeParseAsync(data)
 	if (!result.success) {
 		console.log(result.error)
 		return result.error.flatten()
 	} else {
-		console.log(result.data)
+		// hash password - 비밀번호 변환
+		const hashedPassword = await bcrypt.hash(result.data.password, 12)
+
+		// save the user to db
+		const user = await db.user.create({
+			data: {
+				username: result.data.username,
+				email: result.data.email,
+				password: hashedPassword
+			},
+			select: {
+				id: true
+			}
+		})
+
+		console.log(user)
+		// log the user in
+		// redirect "/home"
 	}
 }
