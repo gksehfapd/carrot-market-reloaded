@@ -6,6 +6,7 @@ import db from '@/lib/db'
 import { getIronSession } from 'iron-session'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import getSession from '@/lib/session'
 
 const checkUniqueUsername = async (username: string) => {
 	const user = await db.user.findUnique({
@@ -92,17 +93,11 @@ export async function createAccount(prevState: any, formData: FormData) {
 
 		// log the user in = 사용자에게 쿠키를 제공
 		// cookies() : 유저의 쿠키를 가져오는 next 내장 함수
-		// iron-session : 쿠키를 만들고, 브라우저에 보내는 등의 작업을 대신 해줌
-		const cookie = await getIronSession(cookies(), {
-			cookieName: 'delicious-karrot',
-			password: process.env.COOKIE_PASSWORD!
-		})
+		// iron-session : 쿠키를 만들고, 브라우저에 보내는 등의 작업을 대신 해줌 -> getSession으로 옮김
+		const session = await getSession()
+		session.id = user.id
 
-		//@ts-ignore
-		cookie.id = user.id
-
-		await cookie.save()
-
+		await session.save()
 		redirect('/profile')
 	}
 }
